@@ -3,6 +3,7 @@ import Produto from '../modules/produtos/produtoEntity';
 import Estoque from '../modules/estoque/estoqueEntity';
 import { FuncionarioBuilder, GerenteBuilder } from '../modules/funcionario/builders';
 import BackupManegerCaixa from '../modules/caixa/backupManegerCaixa';
+import AdicionaProdutoNoCaixa from '../modules/caixa/useCase/adicionaProduto';
 
 const estoque = new Estoque();
 
@@ -24,27 +25,33 @@ const caixa01 = new Caixa(estoque, funcionario);
 
 const backupManegerCaixa = new BackupManegerCaixa(caixa01);
 
+estoque.produtos = [
+  {produto, quantidade: 10},
+  {produto: produto2, quantidade: 20},
+  {produto: produto3, quantidade: 4}
+];
 
-
-
-estoque.produtos = [produto, produto2, produto3];
-
-backupManegerCaixa.backup();
-caixa01.setProduto(produto);
-
-backupManegerCaixa.backup();
-caixa01.setProduto(produto2);
-
-backupManegerCaixa.backup();
-caixa01.setProduto(produto3);
-
-console.log(caixa01.produtos)
+const adicionaProdutoAoCaixa = new AdicionaProdutoNoCaixa(caixa01);
 
 
 backupManegerCaixa.backup();
-backupManegerCaixa.restore(2);
+adicionaProdutoAoCaixa.execute(produto, 2);
 
+backupManegerCaixa.backup();
+adicionaProdutoAoCaixa.execute(produto2, 3);
+
+backupManegerCaixa.backup();
+adicionaProdutoAoCaixa.execute(produto3, 2);
+
+backupManegerCaixa.restore(1);
 backupManegerCaixa.showMementos();
-console.log(caixa01.produtos)
+
+backupManegerCaixa.backup();
+adicionaProdutoAoCaixa.execute(produto3, 2);
+
+caixa01.finalizarCompra();
+
+console.log(estoque.produtos)
+
 
 

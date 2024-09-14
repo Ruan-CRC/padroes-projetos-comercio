@@ -6,10 +6,15 @@ import { Funcionario } from '../funcionario/entityFuncionario';
 import MementoCaixa from "./mementoCaixa";
 import MementoInterface from "../../shared/modules/mementoInterface";
 
+interface ProdutoCaixa {
+  produto: Produto;
+  quantidade: number;
+}
+
 class Caixa {
   private readonly id?: UUID;
   private _saldo: number = 0;
-  private _produtos: Array<Produto> = [];
+  private _produtos: Array<ProdutoCaixa> = [];
   private _funcionario: Funcionario;
   private indexMemento: number = 0;
 
@@ -22,7 +27,7 @@ class Caixa {
     this._funcionario = funcionario;
   }
 
-  get produtos(): Array<Produto> | string {
+  get produtos(): Array<ProdutoCaixa> | string {
     if (!this._produtos) {
       return 'Nenhum produto adicionado';
     }
@@ -39,25 +44,36 @@ class Caixa {
       return 0;
     }
     
-    const total = somaTotal(this._produtos);
+    const total = somaTotal(this._produtos.map((produto) => produto.produto));
 
     return total;
   }
 
-  setProduto(produto: Produto): Caixa {
-    if (!this._produtos.find(p => p.id === produto.id)) {
+  setProduto(produto: ProdutoCaixa) {
+    if (!this._produtos.find(p => p.produto.id === produto.produto.id)) {
       this._produtos.push(produto);
+      return;
     }
-    this._saldo += produto.preco;
-    return this;
+
+    this._produtos.forEach((prod) => {
+      if (prod.produto.id === produto.produto.id) {
+        prod.quantidade += produto.quantidade;
+      }
+    });
   }
 
   removeProduto(id: UUID): void {
-    this._produtos = this._produtos.filter((produto) => produto.id !== id);
+    this._produtos = this._produtos.filter((produto) => produto.produto.id !== id);
   }
 
   finalizarCompra(): void {
-    this.estoque.removerProdutos(this._produtos.map((produto) => produto.id as UUID));
+    const produtosIdsEQuantidade = this._produtos.map((produto) => ({
+      id: produto.produto.id as UUID,
+      quantidade: produto.quantidade
+    }));
+
+    this.estoque.removerProdutos(produtosIdsEQuantidade);
+
     this._produtos = [];
   }
 
@@ -69,7 +85,7 @@ class Caixa {
     this.indexMemento += 1;
     const date = new Date();
 
-    const prodtos = this._produtos.map((prod) => prod.getProduto());
+    const prodtos = this._produtos.map((prod) => prod.produto.getProduto());
 
     return new MementoCaixa(`my-state-${this.indexMemento}`, date, prodtos);
   }
@@ -79,7 +95,9 @@ class Caixa {
     const estado = caixaMemento.getEstado();
     
     if (Array.isArray(estado)) {
-      this._produtos = estado;
+      this._produtos.map((prod) => {
+        this.removeProduto(prod.produto.id as UUID);
+      });
     } else {
       console.log('Estado inválido');
     }
