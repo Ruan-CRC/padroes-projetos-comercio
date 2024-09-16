@@ -2,7 +2,7 @@ import { randomUUID, UUID } from "crypto";
 import Produto from "../produtos/produtoEntity";
 import somaTotal from "../../shared/utils/somaTotal";
 
-interface ProdutoEstoque {
+export interface ProdutoEstoque {
   produto: Produto;
   quantidade: number;
 }
@@ -58,6 +58,11 @@ class Estoque {
         (p) => 'produto' in p && p.produto.id === prod.id
       );
       if (produtoIndex === -1) {
+        return;
+      }
+
+      if (this._produtos[produtoIndex].quantidade < prod.quantidade) {
+        this._produtos[produtoIndex].quantidade = 0;
         return;
       }
 

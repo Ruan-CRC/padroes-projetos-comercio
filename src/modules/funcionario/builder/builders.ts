@@ -1,4 +1,4 @@
-import { Funcionario } from "./entityFuncionario";
+import { Funcionario } from "../entityFuncionario";
 import BuilderFuncionario from "./interfaceBuilderFuncionario";
 
 export class FuncionarioBuilder implements BuilderFuncionario {

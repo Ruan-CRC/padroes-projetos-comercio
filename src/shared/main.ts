@@ -1,8 +1,8 @@
 import Caixa from '../modules/caixa/entityCaixa';
 import Produto from '../modules/produtos/produtoEntity';
 import Estoque from '../modules/estoque/estoqueEntity';
-import { FuncionarioBuilder, GerenteBuilder } from '../modules/funcionario/builders';
-import BackupManegerCaixa from '../modules/caixa/backupManegerCaixa';
+import { FuncionarioBuilder, GerenteBuilder } from '../modules/funcionario/builder/builders';
+import BackupManegerCaixa from '../modules/caixa/mementos/backupManegerCaixa';
 import AdicionaProdutoNoCaixa from '../modules/caixa/useCase/adicionaProduto';
 
 const estoque = new Estoque();
@@ -28,7 +28,7 @@ const backupManegerCaixa = new BackupManegerCaixa(caixa01);
 estoque.produtos = [
   {produto, quantidade: 10},
   {produto: produto2, quantidade: 20},
-  {produto: produto3, quantidade: 4}
+  {produto: produto3, quantidade: 30}
 ];
 
 const adicionaProdutoAoCaixa = new AdicionaProdutoNoCaixa(caixa01);
@@ -39,12 +39,6 @@ adicionaProdutoAoCaixa.execute(produto, 2);
 
 backupManegerCaixa.backup();
 adicionaProdutoAoCaixa.execute(produto2, 3);
-
-backupManegerCaixa.backup();
-adicionaProdutoAoCaixa.execute(produto3, 2);
-
-backupManegerCaixa.restore(1);
-backupManegerCaixa.showMementos();
 
 backupManegerCaixa.backup();
 adicionaProdutoAoCaixa.execute(produto3, 2);

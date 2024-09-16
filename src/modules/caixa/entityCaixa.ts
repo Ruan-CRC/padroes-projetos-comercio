@@ -3,7 +3,7 @@ import Produto from "../produtos/produtoEntity";
 import somaTotal from "../../shared/utils/somaTotal";
 import Estoque from "../estoque/estoqueEntity";
 import { Funcionario } from '../funcionario/entityFuncionario';
-import MementoCaixa from "./mementoCaixa";
+import MementoCaixa from "./mementos/mementoCaixa";
 import MementoInterface from "../../shared/modules/mementoInterface";
 
 interface ProdutoCaixa {

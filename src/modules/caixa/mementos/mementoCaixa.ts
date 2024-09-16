@@ -1,5 +1,5 @@
-import MementoInterface from "../../shared/modules/mementoInterface";
-import Produto from "../produtos/produtoEntity";
+import MementoInterface from "../../../shared/modules/mementoInterface";
+import Produto from "../../produtos/produtoEntity";
 
 class MementoCaixa implements MementoInterface {
   constructor(
