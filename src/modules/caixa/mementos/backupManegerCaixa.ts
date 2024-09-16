@@ -1,5 +1,5 @@
-import MementoInterface from "../../shared/modules/mementoInterface";
-import Caixa from "./entityCaixa";
+import MementoInterface from "../../../shared/modules/mementoInterface";
+import Caixa from "../entityCaixa";
 import MementoCaixa from "./mementoCaixa";
 
 class BackupManegerCaixa {
@@ -10,11 +10,10 @@ class BackupManegerCaixa {
   ) {}
 
   backup(): void {
-    const memento = this.caixa.save();
-    this.mementos.push(memento);
+    this.mementos.push(this.caixa.save());
   }
 
-  restore(quantidade: number): void {
+  restore(quantidade: number = 1): void {
     if (quantidade <= 0 || quantidade > this.mementos.length) {
       console.log('Quantidade inválida ou backups não encontrados');
       return;

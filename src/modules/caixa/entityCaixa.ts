@@ -12,7 +12,6 @@ export interface ProdutoCaixa {
 
 class Caixa {
   private readonly id?: UUID;
-  private _saldo: number = 0;
   private _produtos: Array<ProdutoCaixa> = [];
   private indexMemento: number = 0;
 
@@ -54,17 +53,23 @@ class Caixa {
   }
 
   setProduto(produto: ProdutoCaixa) {
-    if (!this._produtos.find(p => p.produto.id === produto.produto.id)) {
-      this._produtos.push(produto);
+    const existingProduct = this._produtos.find(p => p.produto.id === produto.produto.id);
+  
+    if (!existingProduct) {
+      this._produtos.push({ ...produto });
       return;
     }
-
-    this._produtos.forEach((prod) => {
+  
+    this._produtos = this._produtos.map((prod) => {
       if (prod.produto.id === produto.produto.id) {
-        prod.quantidade += produto.quantidade;
+        return { ...prod, quantidade: prod.quantidade + produto.quantidade };
       }
+      return prod;
     });
+  
+    return this.saldo();
   }
+  
 
   removeProduto(id: UUID, quantidade: number): void {
     const produto = this._produtos.find((produto) => produto.produto.id === id);
@@ -100,17 +105,17 @@ class Caixa {
     this.indexMemento += 1;
     const date = new Date();
 
-    return new MementoCaixa(`my-state-${this.indexMemento}`, date, this._produtos);
+    return new MementoCaixa(
+      `my-state-${this.indexMemento}`, date, [...this._produtos]
+    );;
   }
 
   restoreState(memento: MementoInterface): void {
     const caixaMemento = memento as MementoCaixa;
     const estado = caixaMemento.getEstado();
-    
+
     if (Array.isArray(estado)) {
-      this._produtos.map((prod) => {
-        this.removeProduto(prod.produto.id as UUID, prod.quantidade);
-      });
+      this._produtos = estado
     } else {
       console.log('Estado inválido');
     }

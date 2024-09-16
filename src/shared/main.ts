@@ -3,7 +3,8 @@ import Produto from '../modules/produtos/produtoEntity';
 import Estoque from '../modules/estoque/estoqueEntity';
 import { FuncionarioBuilder, GerenteBuilder } from '../modules/funcionario/builder/builders';
 import BackupManegerCaixa from '../modules/caixa/mementos/backupManegerCaixa';
-import AdicionaProdutoNoCaixa from '../modules/caixa/useCase/adicionaProduto';
+import ControllerCaixa from '../modules/caixa/commands/controller';
+import AlteraEstadoCaixaCommand from '../modules/caixa/commands/alterarEstadoCaixa';
 
 const estoque = new Estoque();
 
@@ -31,17 +32,22 @@ estoque.produtos = [
   {produto: produto3, quantidade: 30}
 ];
 
-const adicionaProdutoAoCaixa = new AdicionaProdutoNoCaixa(caixa01);
+const alteraEstadoCaixaCommand = new AlteraEstadoCaixaCommand(backupManegerCaixa);
+const controllerCaixa = new ControllerCaixa();
 
+controllerCaixa.addCommand('estadoCompra', alteraEstadoCaixaCommand);
 
-backupManegerCaixa.backup();
-adicionaProdutoAoCaixa.execute(produto, 2);
+controllerCaixa.executeCommand('estadoCompra')
+caixa01.setProduto({ produto, quantidade: 5 })
 
-backupManegerCaixa.backup();
-adicionaProdutoAoCaixa.execute(produto2, 3);
+controllerCaixa.executeCommand('estadoCompra')
+caixa01.setProduto({ produto: produto2, quantidade: 15 })
 
-backupManegerCaixa.backup();
-adicionaProdutoAoCaixa.execute(produto3, 2);
+controllerCaixa.executeCommand('estadoCompra')
+caixa01.setProduto({ produto: produto2, quantidade: 5 })
+
+controllerCaixa.executeCommand('estadoCompra')
+controllerCaixa.undoCommand('estadoCompra')
 
 caixa01.finalizarCompra();
 
