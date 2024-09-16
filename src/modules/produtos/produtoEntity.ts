@@ -25,12 +25,8 @@ class Produto {
     return this._preco;
   }
 
-  get id(): UUID | string {
-    if (!this._id) {
-      return 'Produto não encontrado';
-    }
-
-    return this._id;
+  get id(): UUID {
+    return this._id as UUID;
   }
   
 }
