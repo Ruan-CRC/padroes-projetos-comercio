@@ -1,11 +1,12 @@
 import MementoInterface from "../../../shared/modules/mementoInterface";
 import Produto from "../../produtos/produtoEntity";
+import { ProdutoCaixa } from "../entityCaixa";
 
 class MementoCaixa implements MementoInterface {
   constructor(
     private readonly _name: string,
     private readonly _date: Date,
-    private produtos: Array<Produto> | string,
+    private produtos: Array<ProdutoCaixa> | string,
   ) { }
 
   get name(): string {

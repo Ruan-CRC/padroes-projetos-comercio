@@ -1,12 +1,11 @@
 import { randomUUID, UUID } from "crypto";
 import Produto from "../produtos/produtoEntity";
-import somaTotal from "../../shared/utils/somaTotal";
 import Estoque from "../estoque/estoqueEntity";
 import { Funcionario } from '../funcionario/entityFuncionario';
 import MementoCaixa from "./mementos/mementoCaixa";
 import MementoInterface from "../../shared/modules/mementoInterface";
 
-interface ProdutoCaixa {
+export interface ProdutoCaixa {
   produto: Produto;
   quantidade: number;
 }
@@ -15,20 +14,18 @@ class Caixa {
   private readonly id?: UUID;
   private _saldo: number = 0;
   private _produtos: Array<ProdutoCaixa> = [];
-  private _funcionario: Funcionario;
   private indexMemento: number = 0;
 
   constructor(
     private estoque: Estoque,
-    funcionario: Funcionario,
+    private _funcionario: Funcionario,
     id?: UUID
   ) {
     this.id = id || randomUUID();
-    this._funcionario = funcionario;
   }
 
   get produtos(): Array<ProdutoCaixa> | string {
-    if (!this._produtos) {
+    if (this._produtos.length === 0) {
       return 'Nenhum produto adicionado';
     }
 
@@ -43,10 +40,17 @@ class Caixa {
     if (!this._produtos) {
       return 0;
     }
-    
-    const total = somaTotal(this._produtos.map((produto) => produto.produto));
 
-    return total;
+    const quantidadeValorProdutos = this._produtos.map((produto) => {
+      return {
+        preco: produto.produto.preco,
+        quantidade: produto.quantidade
+      }
+    })
+
+    return quantidadeValorProdutos.reduce((acc, item) => {
+      return acc + item.preco * item.quantidade;
+    }, 0);
   }
 
   setProduto(produto: ProdutoCaixa) {
@@ -62,8 +66,19 @@ class Caixa {
     });
   }
 
-  removeProduto(id: UUID): void {
-    this._produtos = this._produtos.filter((produto) => produto.produto.id !== id);
+  removeProduto(id: UUID, quantidade: number): void {
+    const produto = this._produtos.find((produto) => produto.produto.id === id);
+
+    if (!produto) {
+      throw new Error('Produto não encontrado no caixa');
+    }
+
+    if (produto.quantidade === quantidade) {
+      this._produtos = this._produtos.filter((produto) => produto.produto.id !== id);
+      return;
+    }
+
+    produto.quantidade -= quantidade;
   }
 
   finalizarCompra(): void {
@@ -85,9 +100,7 @@ class Caixa {
     this.indexMemento += 1;
     const date = new Date();
 
-    const prodtos = this._produtos.map((prod) => prod.produto.getProduto());
-
-    return new MementoCaixa(`my-state-${this.indexMemento}`, date, prodtos);
+    return new MementoCaixa(`my-state-${this.indexMemento}`, date, this._produtos);
   }
 
   restoreState(memento: MementoInterface): void {
@@ -96,7 +109,7 @@ class Caixa {
     
     if (Array.isArray(estado)) {
       this._produtos.map((prod) => {
-        this.removeProduto(prod.produto.id as UUID);
+        this.removeProduto(prod.produto.id as UUID, prod.quantidade);
       });
     } else {
       console.log('Estado inválido');
